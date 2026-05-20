@@ -17,6 +17,7 @@
 | 卡片轮播组件 | <img src="res/CardSlider.png" width="200" alt="BannerView preview">   | `pyqt_project/CardSlider/src/demo.py` | `CardSlider` | [BV1WoL26yE7M](https://www.bilibili.com/video/BV1WoL26yE7M) |
 | 微软商店导航动效 | <img src="res/MSNavigationBar.png" width="200" alt="MSNavigationBar preview"> | `pyqt_project/MSNavigationBar/src/demo.py` | `MSNavigationBar` |[BV1FHLG6rEHa](https://www.bilibili.com/video/BV1FHLG6rEHa)|
 | 开关按钮动效 | <img src="res/SwitchButton.png" width="200" alt="SwitchButton preview"> | `pyqt_project/SwitchButton/src/demo.py` | `SwitchButton` | [BV1ArLL6sEJy](https://www.bilibili.com/video/BV1ArLL6sEJy) |
+| 放大镜组件 | <img src="res/MagnifierLens.png" width="200" alt="MagnifierLens preview"> | `pyqt_project/MagnifierLens/src/demo.py` | `MagnifierLens` |[BV18mLU6bEYV](https://www.bilibili.com/video/BV18mLU6bEYV) |
 
 
  <p>注：Demo 仅使用 pip 包 <code>qfluentwidgets</code> 提供窗口、按钮、样式和主题控件</p>
