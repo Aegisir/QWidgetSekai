@@ -1,0 +1,548 @@
+# coding:utf-8
+from typing import Dict, Union
+
+from PyQt5.QtCore import Qt, QRect, QPropertyAnimation, QEasingCurve, pyqtProperty, QRectF, QPoint
+from PyQt5.QtGui import QFont, QPainter, QColor, QIcon
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
+
+from qfluentwidgets.common.color import autoFallbackThemeColor
+from qfluentwidgets.common.config import isDarkTheme, qconfig
+from qfluentwidgets.common.font import setFont
+from qfluentwidgets.common.icon import drawIcon, FluentIconBase, toQIcon
+from qfluentwidgets.common.icon import FluentIcon as FIF
+from qfluentwidgets.common.router import qrouter
+from qfluentwidgets.common.style_sheet import FluentStyleSheet
+from qfluentwidgets.components.navigation.navigation_panel import RouteKeyError, NavigationItemPosition
+from qfluentwidgets.components.navigation.navigation_widget import (
+    NavigationIndicator, NavigationPushButton, NavigationWidget,
+)
+from qfluentwidgets.components.widgets.scroll_area import ScrollArea
+
+
+class IconSlideAnimation(QPropertyAnimation):
+    """ Icon sliding animation """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._offset = 0
+        self.maxOffset = 6
+        self.setTargetObject(self)
+        self.setPropertyName(b"offset")
+        self.setEasingCurve(QEasingCurve.OutCubic)
+
+    def getOffset(self):
+        return self._offset
+
+    def setOffset(self, value: float):
+        self._offset = value
+        self.parent().update()
+
+    def slideDown(self, useAni=True):
+        """ slide down """
+        self.stop()
+        if not useAni:
+            self.setOffset(self.maxOffset)
+            return
+
+        self.setStartValue(self.offset)
+        self.setEndValue(self.maxOffset)
+        self.setDuration(400)
+        self.start()
+
+    def slideUp(self, useAni=True):
+        """ slide up """
+        self.stop()
+        if not useAni:
+            self.setOffset(0)
+            return
+
+        self.setStartValue(self.offset)
+        self.setEndValue(0)
+        self.setDuration(400)
+        self.start()
+
+    offset = pyqtProperty(float, getOffset, setOffset)
+
+
+class NavigationBarPushButton(NavigationPushButton):
+    """ Navigation bar push button """
+
+    def __init__(self, icon: Union[str, QIcon, FIF], text: str, isSelectable: bool,
+                 selectedIcon=None, parent=None):
+        super().__init__(icon, text, isSelectable, parent)
+        self._selectedIcon = selectedIcon
+        self._isSelectedTextVisible = True
+        self._isItemAnimationEnabled = True
+        self._selectedIconOpacity = 0
+        self._backgroundColor = QColor(0, 0, 0, 0)
+        self.lightSelectedColor = QColor()
+        self.darkSelectedColor = QColor()
+
+        self.iconAni = IconSlideAnimation(self)
+        self.opacityAni = QPropertyAnimation(self, b"selectedIconOpacity", self)
+        self.backgroundColorAni = QPropertyAnimation(self, b"backgroundColor", self)
+        self.opacityAni.setDuration(200)
+        self.opacityAni.setEasingCurve(QEasingCurve.OutQuad)
+        self.backgroundColorAni.setDuration(150)
+        self.backgroundColorAni.setEasingCurve(QEasingCurve.Linear)
+
+        self.setFixedSize(64, 58)
+        setFont(self, 11)
+
+    def setSelectedColor(self, light, dark):
+        self.lightSelectedColor = QColor(light)
+        self.darkSelectedColor = QColor(dark)
+        self.update()
+
+    def selectedIcon(self):
+        if self._selectedIcon:
+            return toQIcon(self._selectedIcon)
+
+        return QIcon()
+
+    def setSelectedIcon(self, icon: Union[str, QIcon, FIF]):
+        self._selectedIcon = icon
+        self.update()
+
+    def setSelectedTextVisible(self, isVisible):
+        self._isSelectedTextVisible = isVisible
+        self._syncIconState(False)
+        self.update()
+
+    def isItemAnimationEnabled(self):
+        return self._isItemAnimationEnabled
+
+    def setItemAnimationEnabled(self, isEnabled: bool):
+        if isEnabled == self._isItemAnimationEnabled:
+            return
+
+        self._isItemAnimationEnabled = isEnabled
+        self._syncIconState(False)
+        self._syncBackgroundState(False)
+        self.update()
+
+    def getSelectedIconOpacity(self):
+        return self._selectedIconOpacity
+
+    def setSelectedIconOpacity(self, opacity: float):
+        self._selectedIconOpacity = opacity
+        self.update()
+
+    def getBackgroundColor(self):
+        return self._backgroundColor
+
+    def setBackgroundColor(self, color: QColor):
+        self._backgroundColor = QColor(color)
+        self.update()
+
+    def indicatorRect(self):
+        """ get the indicator geometry """
+        return QRectF(0, 16, 4, 24)
+
+    def enterEvent(self, e):
+        self.isEnter = True
+        self._syncBackgroundState(self._isItemAnimationEnabled)
+
+    def leaveEvent(self, e):
+        self.isEnter = False
+        self.isPressed = False
+        self._syncBackgroundState(self._isItemAnimationEnabled)
+
+    def mousePressEvent(self, e):
+        super().mousePressEvent(e)
+        self._syncBackgroundState(self._isItemAnimationEnabled)
+
+    def mouseReleaseEvent(self, e):
+        super().mouseReleaseEvent(e)
+        self._syncBackgroundState(self._isItemAnimationEnabled)
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing |
+                               QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform)
+        painter.setPen(Qt.NoPen)
+
+        self._drawBackground(painter)
+        self._drawIcon(painter)
+        self._drawText(painter)
+
+    def _drawBackground(self, painter: QPainter):
+        if self.backgroundColor.alpha() > 0:
+            painter.setBrush(self.backgroundColor)
+            painter.drawRoundedRect(self.rect(), 5, 5)
+
+        if self.isSelected and not self.isAboutSelected:
+            painter.setBrush(autoFallbackThemeColor(self.lightSelectedColor, self.darkSelectedColor))
+            if not self.isPressed:
+                painter.drawRoundedRect(0, 16, 4, 24, 2, 2)
+            else:
+                painter.drawRoundedRect(0, 19, 4, 18, 2, 2)
+
+    def _drawIcon(self, painter: QPainter):
+        painter.save()
+
+        opacity = self._iconOpacity()
+        selectedOpacity = self._selectedIconOpacity
+        normalOpacity = 1 - selectedOpacity
+        rect = QRectF(22, 13 + self.iconAni.offset, 20, 20)
+
+        if normalOpacity > 0:
+            painter.setOpacity(opacity * normalOpacity)
+            drawIcon(self._icon, painter, rect)
+
+        if selectedOpacity > 0:
+            painter.setOpacity(opacity * selectedOpacity)
+            self._drawSelectedIcon(painter, rect)
+
+        painter.restore()
+
+    def _drawSelectedIcon(self, painter: QPainter, rect: QRectF):
+        selectedIcon = self._selectedIcon or self._icon
+        if isinstance(selectedIcon, FluentIconBase):
+            color = autoFallbackThemeColor(self.lightSelectedColor, self.darkSelectedColor)
+            selectedIcon.render(painter, rect, fill=color.name())
+        else:
+            drawIcon(selectedIcon, painter, rect)
+
+    def _iconOpacity(self):
+        if not self.isEnabled():
+            return 0.4
+
+        if (self.isPressed or not self.isEnter) and not (self.isSelected or self.isAboutSelected):
+            return 0.6
+
+        return 1
+
+    def _drawText(self, painter: QPainter):
+        if (self.isSelected or self.isAboutSelected) and not self._isSelectedTextVisible:
+            return
+
+        if self.isSelected or self.isAboutSelected:
+            painter.setPen(autoFallbackThemeColor(self.lightSelectedColor, self.darkSelectedColor))
+        else:
+            painter.setPen(Qt.white if isDarkTheme() else Qt.black)
+
+        painter.setFont(self.font())
+        rect = QRect(0, 32, self.width(), 26)
+        painter.drawText(rect, Qt.AlignCenter, self.text())
+
+    def setSelected(self, isSelected: bool):
+        if isSelected == self.isSelected:
+            return
+
+        self.isSelected = isSelected
+        self.isAboutSelected = False
+        self._syncIconState(self._isItemAnimationEnabled)
+        self._syncBackgroundState(self._isItemAnimationEnabled)
+
+    def setAboutSelected(self, selected: bool):
+        if selected == self.isAboutSelected:
+            return
+
+        self.isAboutSelected = selected
+        self._syncIconState(self._isItemAnimationEnabled)
+        self._syncBackgroundState(self._isItemAnimationEnabled)
+
+    def _targetBackgroundColor(self):
+        if self.isSelected or self.isAboutSelected:
+            return QColor(255, 255, 255, 42) if isDarkTheme() else QColor(Qt.white)
+
+        c = 255 if isDarkTheme() else 0
+        if self.isPressed:
+            return QColor(c, c, c, 12 if isDarkTheme() else 16)
+
+        if self.isEnter:
+            return QColor(c, c, c, 32 if isDarkTheme() else 24)
+
+        return QColor(0, 0, 0, 0)
+
+    def _syncBackgroundState(self, useAni=True):
+        targetColor = self._targetBackgroundColor()
+
+        self.backgroundColorAni.stop()
+        if useAni:
+            duration = 220 if targetColor.alpha() < self.backgroundColor.alpha() else 150
+            self.backgroundColorAni.setDuration(duration)
+            self.backgroundColorAni.setStartValue(self.backgroundColor)
+            self.backgroundColorAni.setEndValue(targetColor)
+            self.backgroundColorAni.start()
+        else:
+            self.setBackgroundColor(targetColor)
+
+    def _syncIconState(self, useAni=True):
+        isSelected = self.isSelected or self.isAboutSelected
+        offset = self.iconAni.maxOffset if isSelected else 0
+        opacity = 1 if isSelected else 0
+
+        self.opacityAni.stop()
+        if useAni:
+            self.opacityAni.setStartValue(self.selectedIconOpacity)
+            self.opacityAni.setEndValue(opacity)
+            self.opacityAni.start()
+        else:
+            self.setSelectedIconOpacity(opacity)
+
+        if offset:
+            self.iconAni.slideDown(useAni)
+        else:
+            self.iconAni.slideUp(useAni)
+
+        self.update()
+
+    backgroundColor = pyqtProperty(QColor, getBackgroundColor, setBackgroundColor)
+    selectedIconOpacity = pyqtProperty(float, getSelectedIconOpacity, setSelectedIconOpacity)
+
+
+class NavigationBar(QWidget):
+    """ Navigation bar with Microsoft Store style item animations """
+
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        self.indicator = NavigationIndicator(self)
+        self._isIndicatorAnimationEnabled = True
+        self._isSelectedTextVisible = True
+        self._isItemAnimationEnabled = True
+
+        self.lightSelectedColor = QColor()
+        self.darkSelectedColor = QColor()
+
+        self.scrollArea = ScrollArea(self)
+        self.scrollWidget = QWidget()
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.topLayout = QVBoxLayout()
+        self.bottomLayout = QVBoxLayout()
+        self.scrollLayout = QVBoxLayout(self.scrollWidget)
+
+        self.items = {}   # type: Dict[str, NavigationWidget]
+        self.history = qrouter
+        self._currentRouteKey = None
+
+        self.__initWidget()
+
+    def __initWidget(self):
+        self.resize(48, self.height())
+        self.setAttribute(Qt.WA_StyledBackground)
+        self.window().installEventFilter(self)
+
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.horizontalScrollBar().setEnabled(False)
+        self.scrollArea.setWidget(self.scrollWidget)
+        self.scrollArea.setWidgetResizable(True)
+
+        self.scrollWidget.setObjectName('scrollWidget')
+        FluentStyleSheet.NAVIGATION_INTERFACE.apply(self)
+        FluentStyleSheet.NAVIGATION_INTERFACE.apply(self.scrollWidget)
+        self.__initLayout()
+
+        self.indicator.aniFinished.connect(self._onIndicatorAniFinished)
+        qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
+
+    def __initLayout(self):
+        self.vBoxLayout.setContentsMargins(0, 5, 0, 5)
+        self.topLayout.setContentsMargins(4, 0, 4, 0)
+        self.bottomLayout.setContentsMargins(4, 0, 4, 0)
+        self.scrollLayout.setContentsMargins(4, 0, 4, 0)
+        self.vBoxLayout.setSpacing(4)
+        self.topLayout.setSpacing(4)
+        self.bottomLayout.setSpacing(4)
+        self.scrollLayout.setSpacing(4)
+
+        self.vBoxLayout.addLayout(self.topLayout, 0)
+        self.vBoxLayout.addWidget(self.scrollArea)
+        self.vBoxLayout.addLayout(self.bottomLayout, 0)
+
+        self.vBoxLayout.setAlignment(Qt.AlignTop)
+        self.topLayout.setAlignment(Qt.AlignTop)
+        self.scrollLayout.setAlignment(Qt.AlignTop)
+        self.bottomLayout.setAlignment(Qt.AlignBottom)
+
+    def widget(self, routeKey: str):
+        if routeKey not in self.items:
+            raise RouteKeyError(f"`{routeKey}` is illegal.")
+
+        return self.items[routeKey]
+
+    def addItem(self, routeKey: str, icon: Union[str, QIcon, FluentIconBase], text: str, onClick=None,
+                selectable=True, selectedIcon=None, position=NavigationItemPosition.TOP):
+        """ add navigation item """
+        return self.insertItem(-1, routeKey, icon, text, onClick, selectable, selectedIcon, position)
+
+    def addWidget(self, routeKey: str, widget: NavigationWidget, onClick=None,
+                  position=NavigationItemPosition.TOP):
+        """ add custom widget """
+        self.insertWidget(-1, routeKey, widget, onClick, position)
+
+    def insertItem(self, index: int, routeKey: str, icon: Union[str, QIcon, FluentIconBase],
+                   text: str, onClick=None, selectable=True, selectedIcon=None,
+                   position=NavigationItemPosition.TOP):
+        """ insert navigation tree item """
+        if routeKey in self.items:
+            return
+
+        w = NavigationBarPushButton(icon, text, selectable, selectedIcon, self)
+        w.setSelectedColor(self.lightSelectedColor, self.darkSelectedColor)
+        w.setSelectedTextVisible(self.isSelectedTextVisible())
+        w.setItemAnimationEnabled(self.isItemAnimationEnabled())
+        self.insertWidget(index, routeKey, w, onClick, position)
+        return w
+
+    def insertWidget(self, index: int, routeKey: str, widget: NavigationWidget, onClick=None,
+                     position=NavigationItemPosition.TOP):
+        """ insert custom widget """
+        if routeKey in self.items:
+            return
+
+        self._registerWidget(routeKey, widget, onClick)
+        self._insertWidgetToLayout(index, widget, position)
+
+    def _registerWidget(self, routeKey: str, widget: NavigationWidget, onClick):
+        """ register widget """
+        widget.clicked.connect(self._onWidgetClicked)
+
+        if onClick is not None:
+            widget.clicked.connect(onClick)
+
+        widget.setProperty('routeKey', routeKey)
+        self.items[routeKey] = widget
+
+    def _insertWidgetToLayout(self, index: int, widget: NavigationWidget,
+                              position: NavigationItemPosition):
+        """ insert widget to layout """
+        if position == NavigationItemPosition.TOP:
+            widget.setParent(self)
+            self.topLayout.insertWidget(index, widget, 0, Qt.AlignTop | Qt.AlignHCenter)
+        elif position == NavigationItemPosition.SCROLL:
+            widget.setParent(self.scrollWidget)
+            self.scrollLayout.insertWidget(index, widget, 0, Qt.AlignTop | Qt.AlignHCenter)
+        else:
+            widget.setParent(self)
+            self.bottomLayout.insertWidget(index, widget, 0, Qt.AlignBottom | Qt.AlignHCenter)
+
+        widget.show()
+
+    def removeWidget(self, routeKey: str):
+        """ remove widget """
+        if routeKey not in self.items:
+            return
+
+        widget = self.items.pop(routeKey)
+        widget.deleteLater()
+        self.history.remove(routeKey)
+
+    def currentItem(self):
+        return self.widget(self._currentRouteKey) if self._currentRouteKey else None
+
+    def setCurrentItem(self, routeKey: str):
+        """ set current selected item """
+        if routeKey not in self.items or routeKey == self._currentRouteKey:
+            return
+
+        self._stopIndicatorAnimation()
+
+        prevItem = self.currentItem()
+        self._currentRouteKey = routeKey
+
+        if not self.isIndicatorAnimationEnabled() or prevItem is None:
+            for k, widget in self.items.items():
+                widget.setSelected(k == routeKey)
+
+            return
+
+        newItem = self.currentItem()
+        preIndicatorRect = self._getIndicatorRect(prevItem)
+        newIndicatorRect = self._getIndicatorRect(newItem)
+
+        prevItem.setSelected(False)
+        newItem.setAboutSelected(True)
+        self.indicator.raise_()
+        self.indicator.setIndicatorColor(newItem.lightIndicatorColor, newItem.darkIndicatorColor)
+        self.indicator.startAnimation(preIndicatorRect, newIndicatorRect)
+
+    def setFont(self, font: QFont):
+        """ set the font of navigation item """
+        super().setFont(font)
+
+        for widget in self.buttons():
+            widget.setFont(font)
+
+    def setSelectedTextVisible(self, isVisible: bool):
+        """ set whether the text is visible when button is selected """
+        if isVisible == self._isSelectedTextVisible:
+            return
+
+        self._isSelectedTextVisible = isVisible
+        for widget in self.buttons():
+            if hasattr(widget, 'setSelectedTextVisible'):
+                widget.setSelectedTextVisible(isVisible)
+
+    def isSelectedTextVisible(self):
+        return self._isSelectedTextVisible
+
+    def setItemAnimationEnabled(self, isEnabled: bool):
+        """ set whether item animations are enabled """
+        if isEnabled == self._isItemAnimationEnabled:
+            return
+
+        self._isItemAnimationEnabled = isEnabled
+        for widget in self.buttons():
+            if hasattr(widget, 'setItemAnimationEnabled'):
+                widget.setItemAnimationEnabled(isEnabled)
+
+    def isItemAnimationEnabled(self):
+        return self._isItemAnimationEnabled
+
+    def setSelectedColor(self, light, dark):
+        """ set the selected color of all items """
+        self.lightSelectedColor = QColor(light)
+        self.darkSelectedColor = QColor(dark)
+        for button in self.buttons():
+            if hasattr(button, 'setSelectedColor'):
+                button.setSelectedColor(self.lightSelectedColor, self.darkSelectedColor)
+
+    def buttons(self):
+        return [i for i in self.items.values() if isinstance(i, NavigationPushButton)]
+
+    def isIndicatorAnimationEnabled(self):
+        return self._isIndicatorAnimationEnabled
+
+    def setIndicatorAnimationEnabled(self, isEnabled: bool):
+        self._isIndicatorAnimationEnabled = isEnabled
+
+    def _onWidgetClicked(self):
+        widget = self.sender()  # type: NavigationWidget
+        if widget.isSelectable:
+            self.setCurrentItem(widget.property('routeKey'))
+
+    def _getIndicatorRect(self, item: NavigationWidget):
+        if not item:
+            return QRect()
+
+        pos = item.mapTo(self, QPoint(0, 0))
+        rect = item.indicatorRect()
+        return rect.translated(pos)
+
+    def _stopIndicatorAnimation(self):
+        if not self.isIndicatorAnimationEnabled():
+            return
+
+        self.indicator.stopAnimation()
+        self._onIndicatorAniFinished()
+
+    def _onIndicatorAniFinished(self):
+        item = self.currentItem()
+        if not item:
+            return
+
+        item.setSelected(True)
+        item.setAboutSelected(False)
+        self.indicator.hide()
+
+    def _onThemeChangedFinished(self):
+        for widget in self.buttons():
+            if hasattr(widget, '_syncBackgroundState'):
+                widget._syncBackgroundState(False)
+            widget.update()
+
+        self.update()
