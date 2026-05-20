@@ -14,6 +14,7 @@
 | :--- | :--- | :--- | :--- | :--- |
 | 粒子背景组件 | <img src="res/Particle.png" width="200" alt="Particle preview"> | `pyqt_project/Particle/src/demo.py` | `Particle` | [BV1mjLE6ME1o](https://www.bilibili.com/video/BV18bLK6rEsj) |
 | 轮播横幅组件 | <img src="res/BannerView.png" width="200" alt="BannerView preview"> | `pyqt_project/BannerView/src/demo.py` | `BannerView` | [BV18bLK6rEsj](https://www.bilibili.com/video/BV1mjLE6ME1o) |
+| 卡片轮播组件 | <img src="res/CardSlider.png" width="200" alt="BannerView preview">   | `pyqt_project/CardSlider/src/demo.py` | `CardSlider` | [BV1WoL26yE7M](https://www.bilibili.com/video/BV1WoL26yE7M) |
 | 微软商店导航动效 | <img src="res/MSNavigationBar.png" width="200" alt="MSNavigationBar preview"> | `pyqt_project/MSNavigationBar/src/demo.py` | `MSNavigationBar` |[BV1FHLG6rEHa](https://www.bilibili.com/video/BV1FHLG6rEHa)|
 | 开关按钮动效 | <img src="res/SwitchButton.png" width="200" alt="SwitchButton preview"> | `pyqt_project/SwitchButton/src/demo.py` | `SwitchButton` | [BV1ArLL6sEJy](https://www.bilibili.com/video/BV1ArLL6sEJy) |
 
