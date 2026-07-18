@@ -1,5 +1,5 @@
 ﻿<div align="center">
-    <img src="res/QWidgetSekai1.png" width="190">
+    <img src="res/QWidgetSekai1.png" width="300">
     <h1>My QWidget Sekai</h1>
     <p></p>
 <p align="center">
@@ -20,6 +20,7 @@
 | 开关按钮动效 | <img src="res/SwitchButton.png" width="200" alt="SwitchButton preview"> | `pyqt_project/SwitchButton/src/demo.py` | `SwitchButton` | [BV1ArLL6sEJy](https://www.bilibili.com/video/BV1ArLL6sEJy) |
 | 放大镜组件 | <img src="res/MagnifierLens.png" width="200" alt="MagnifierLens preview"> | `pyqt_project/MagnifierLens/src/demo.py` | `MagnifierLens` |[BV18mLU6bEYV](https://www.bilibili.com/video/BV18mLU6bEYV) |
 | 缩放视差组件 | <img src="res/ZoomParallax.png" width="200" alt="ZoomParallax preview"> | `pyqt_project/ZoomParallax/src/demo.py` | `ZoomParallax` |[BV1vzG863ELN](https://www.bilibili.com/video/BV1vzG863ELN)|
+| 剧透效果组件 | <img src="res/SpoilerLabel.png" width="200" alt="MagnifierLens preview"> | `pyqt_project/SpoilerLabel/src/demo.py` | `SpoilerLabel` |[BV1xpKK6VEGo](https://www.bilibili.com/video/BV1xpKK6VEGo)|
 
 
  <p>注：Demo 仅使用 pip 包 <code>qfluentwidgets</code> 提供窗口、按钮、样式和主题控件</p>
@@ -32,6 +33,5 @@
 - [**Anime_jiamian** : QT/Vulakn渲染的项目们](https://github.com/daishuboluo/Anime_jiamian)
 - [**DevWinUI** : A collection of useful classes, controls, styles, and codes for WinUI 3](https://github.com/ghost1372/DevWinUI.git)
 - [**PyQt-Fluent-Widgets** : A fluent design widgets library based on C++ Qt/PyQt/PySide](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
-
 
 
