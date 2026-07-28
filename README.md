@@ -16,6 +16,7 @@
 | 流场背景组件 | <img src="res/FlowField.png" width="200" alt="FlowField preview">| `pyqt_project/FlowField/src/demo.py` | `FlowField` | [BV1uFLY6jEjU](https://www.bilibili.com/video/BV1uFLY6jEjU) |
 | 轮播横幅组件 | <img src="res/BannerView.png" width="200" alt="BannerView preview"> | `pyqt_project/BannerView/src/demo.py` | `BannerView` | [BV18bLK6rEsj](https://www.bilibili.com/video/BV1mjLE6ME1o) |
 | 卡片轮播组件 | <img src="res/CardSlider.png" width="200" alt="CardSlider preview">   | `pyqt_project/CardSlider/src/demo.py` | `CardSlider` | [BV1WoL26yE7M](https://www.bilibili.com/video/BV1WoL26yE7M) |
+| 堆叠卡片组件 | <img src="res/StackedCardCarousel.png" width="200" alt="StackedCardCarousel preview"> | `pyqt_project/StackedCardCarousel/src/demo.py` | `StackedCardCarousel` | - |
 | 微软商店导航动效 | <img src="res/MSNavigationBar.png" width="200" alt="MSNavigationBar preview"> | `pyqt_project/MSNavigationBar/src/demo.py` | `MSNavigationBar` |[BV1FHLG6rEHa](https://www.bilibili.com/video/BV1FHLG6rEHa)|
 | 开关按钮动效 | <img src="res/SwitchButton.png" width="200" alt="SwitchButton preview"> | `pyqt_project/SwitchButton/src/demo.py` | `SwitchButton` | [BV1ArLL6sEJy](https://www.bilibili.com/video/BV1ArLL6sEJy) |
 | 放大镜组件 | <img src="res/MagnifierLens.png" width="200" alt="MagnifierLens preview"> | `pyqt_project/MagnifierLens/src/demo.py` | `MagnifierLens` |[BV18mLU6bEYV](https://www.bilibili.com/video/BV18mLU6bEYV) |
@@ -33,5 +34,5 @@
 - [**Anime_jiamian** : QT/Vulakn渲染的项目们](https://github.com/daishuboluo/Anime_jiamian)
 - [**DevWinUI** : A collection of useful classes, controls, styles, and codes for WinUI 3](https://github.com/ghost1372/DevWinUI.git)
 - [**PyQt-Fluent-Widgets** : A fluent design widgets library based on C++ Qt/PyQt/PySide](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
-
+- [**Stacked Card Carousel** : Original component and motion reference](https://21st.dev/@shadcnspace/components/carousel-07)
 
