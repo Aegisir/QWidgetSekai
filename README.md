@@ -1,14 +1,12 @@
 <div align="center">
-    <img src="res/QWidgetSekai1.png" width="300">
-    <h1>My QWidget Sekai</h1>
-    <p></p>
-<p align="center">
-  <img src="https://count.kjchmc.cn/get/@Aegisir?theme=gelbooru" alt=":name" />
+    <img src="res/readme.png" width="600">
 
-<p align = "center">    
+
+  
 </p>
 </div>
 
+---
 
 | 主题 | 图片 | 运行入口 | 文件名 | 视频演示 |
 | :--- | :--- | :--- | :--- | :--- |
@@ -37,3 +35,11 @@
 - [**PyQt-Fluent-Widgets** : A fluent design widgets library based on C++ Qt/PyQt/PySide](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
 - [**Stacked Card Carousel** : Original component and motion reference](https://21st.dev/@shadcnspace/components/carousel-07)
 - [**Collapse** : Intro splash Lottie and sequence](https://github.com/CollapseLauncher/Collapse)
+
+---
+
+<div align="center">
+    <img src="https://count.kjchmc.cn/get/@Aegisir?theme=gelbooru" alt=":name" />
+</p>
+</div>
+<p align = "center">  

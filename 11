@@ -1,0 +1,277 @@
+1. 00:00–00:03 不是静态 Logo，是 1920 的 Lottie
+
+
+lottie_player.py
+Ln 14–35
+DEFAULT_LOTTIE_PATH = (
+    Path(__file__).resolve().parents[1] / 'resource' / 'NewLogoTitleIntro.json'
+)
+...
+        self._compositionSize = QSize(1920, 1080)
+2. 00:03–00:06 600 帧 / 60fps / 1.5 倍速 ≈ 6.7s
+
+
+lottie_player.py
+Ln 29–33
+self._playbackRate = 1.5
+...
+self._frameRate = 60.0
+self._duration = 10.0
+
+lottie_player.py
+Ln 79–82
+self._frameCount = max(1.0, float(totalFrame) or 600.0)
+self._duration = float(duration) or 10.0
+self._frameRate = self._frameCount / max(self._duration, 1e-6)
+
+lottie_player.py
+Ln 176–184
+def _targetFrame(self):
+    progress = self._progress()
+    lastFrame = max(self._frameCount - 1e-3, 0.0)
+    return min(max(progress, 0.0), 1.0) * lastFrame
+def _progress(self):
+    duration = max(self._duration, 1e-6)
+    return self._elapsedMs() / 1000.0 * self._playbackRate / duration
+3. 00:06–00:09 播完交叉淡出 0.75s，露出后面页面
+
+
+splash_screen.py
+Ln 16–17
+INTRO_FADE_DURATION = 750
+INTRO_HOLD_DURATION = 250
+
+splash_screen.py
+Ln 163–173
+def _startCrossFade(self):
+    self._stopFade()
+    self.opacityAni.setStartValue(self.lottiePlayer.fadeOpacity)
+    self.opacityAni.setEndValue(0.0)
+    self._animateToggleOpacity(0.0)
+    self.contentOpacityAni.setStartValue(
+        self._contentEffect.opacity() if self._contentEffect else 0
+    )
+    self.contentOpacityAni.setEndValue(1)
+    self.opacityAni.start()
+    self.contentOpacityAni.start()
+
+splash_screen.py
+Ln 77–85
+def setContentWidget(self, widget: QWidget):
+    ...
+    self._contentEffect = QGraphicsOpacityEffect(widget)
+    self._contentEffect.setOpacity(0)
+    widget.setGraphicsEffect(self._contentEffect)
+4. 00:09–00:12 官方 SplashScreen，播放时只留按钮、不露标题
+
+
+splash_screen.py
+Ln 27–28
+class SplashScreen(FluentSplashScreen):
+    """ Collapse intro splash overlay """
+
+splash_screen.py
+Ln 131–137
+self._hideParentTitleBar()
+if sys.platform != 'darwin':
+    self.titleBar.show()
+self.introToggle.show()
+self.lottiePlayer.show()
+self.lottiePlayer.play()
+self._raiseChrome()
+
+splash_screen.py
+Ln 217–227
+def _hideParentTitleBar(self):
+    titleBar = self._parentTitleBar()
+    if titleBar is not None:
+        titleBar.hide()
+def _restoreParentTitleBar(self):
+    titleBar = self._parentTitleBar()
+    if titleBar is not None:
+        titleBar.show()
+        titleBar.raise_()
+5. 00:12–00:15 右下角开关，空闲半透明，悬停才亮
+
+
+splash_screen.py
+Ln 18–24
+TOGGLE_FADE_DURATION = 500
+TOGGLE_IDLE_OPACITY = 0.25
+TOGGLE_HOVER_OPACITY = 1.0
+TOGGLE_MARGIN_RIGHT = 16
+TOGGLE_MARGIN_BOTTOM = 24
+TOGGLE_MARGIN_LEFT = 32
+TOGGLE_MARGIN_TOP = 32
+
+splash_screen.py
+Ln 44–51
+self.introToggle = CheckBox(self.tr('Use Intro Animation Sequence'), self)
+...
+self.toggleEffect.setOpacity(TOGGLE_IDLE_OPACITY)
+self.introToggle.setGraphicsEffect(self.toggleEffect)
+
+splash_screen.py
+Ln 144–150
+if introToggle is not None and obj is introToggle:
+    if e.type() == QEvent.Enter:
+        self._animateToggleOpacity(TOGGLE_HOVER_OPACITY)
+    elif e.type() == QEvent.Leave:
+        self._animateToggleOpacity(TOGGLE_IDLE_OPACITY)
+
+splash_screen.py
+Ln 196–207
+x = max(TOGGLE_MARGIN_LEFT, self.width() - TOGGLE_MARGIN_RIGHT - hint.width())
+y = max(TOGGLE_MARGIN_TOP, self.height() - TOGGLE_MARGIN_BOTTOM - hint.height())
+self.introToggle.setGeometry(int(x), int(y), hint.width(), hint.height())
+6–7. 00:15–00:22 rlottie 到 1024 缺块 / 钳分辨率会糊
+
+这两句是旧实现，当前代码里已经没有 MAX_RLOTTIE_EDGE。对应“现在怎么避开”的是原生分辨率，不再钳 1023：
+
+
+lottie_player.py
+Ln 186–196
+def _renderSize(self):
+    dpr = self.devicePixelRatioF() or 1.0
+    ...
+    pixelSize = QSize(
+        max(1, round(widgetSize.width() * dpr)),
+        max(1, round(widgetSize.height() * dpr)),
+    )
+    fitted = self._compositionSize.scaled(pixelSize, Qt.KeepAspectRatio)
+8. 00:22–00:26 换成 ThorVG，原生高分辨率
+
+
+lottie_player.py
+Ln 11–11
+from thorvg_python import Colorspace, Engine, LottieAnimation, Result, SwCanvas
+
+lottie_player.py
+Ln 21–44
+class LottiePlayer(QWidget):
+    """ ThorVG-backed Lottie player """
+    ...
+        self._engine = Engine(threads=0)
+        self._canvas = SwCanvas(self._engine)
+
+lottie_player.py
+Ln 208–241
+if self._canvas.w != width or self._canvas.h != height:
+    self._canvas.set_target(width, height, cs=Colorspace.ARGB8888)
+self._picture.set_size(float(width), float(height))
+...
+self._animation.set_frame(frameKey)
+self._canvas.update()
+self._canvas.draw(True)
+self._canvas.sync()
+...
+image = QImage(
+    self._frameBuffer,
+    width,
+    height,
+    width * 4,
+    QImage.Format_ARGB32_Premultiplied,
+)
+9. 00:26–00:30 淡出只改 Lottie 透明度，不套整层 Effect
+
+
+splash_screen.py
+Ln 57–60
+self.opacityAni = QPropertyAnimation(self.lottiePlayer, b'fadeOpacity', self)
+self.opacityAni.setDuration(INTRO_FADE_DURATION)
+
+lottie_player.py
+Ln 136–147
+def getFadeOpacity(self):
+    return self._fadeOpacity
+def setFadeOpacity(self, opacity: float):
+    ...
+    self._fadeOpacity = opacity
+    self.update()
+fadeOpacity = pyqtProperty(float, getFadeOpacity, setFadeOpacity)
+
+lottie_player.py
+Ln 259–262
+painter = QPainter(self)
+painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+painter.setOpacity(self._fadeOpacity)
+painter.drawImage(self._destRect(), self._frameImage)
+10. 00:30–00:33 独立 Demo，可 Replay
+
+当前窗口是 1024×576（不是口播里的 1280）：
+
+
+demo.py
+Ln 129–155
+configuration = DemoConfiguration(
+    ...
+    window_size=(1024, 576),
+    minimum_window_size=(1024, 576),
+)
+...
+splashScreen.setPlaybackRate(1.5)
+contentWidget.replayButton.clicked.connect(splashScreen.replay)
+...
+window.show()
+splashScreen.play()
+
+splash_screen.py
+Ln 139–141
+def replay(self):
+    self.setIntroEnabled(True)
+    self.play()
+11. 00:33–00:37 时间轴对齐、渲染避开引擎坑、窗口盖住标题
+
+三件事叠在 play() 里：
+
+
+splash_screen.py
+Ln 113–137
+def play(self):
+    self._stopFade()
+    self.lottiePlayer.setFadeOpacity(1.0)
+    ...
+    self._hideParentTitleBar()
+    if sys.platform != 'darwin':
+        self.titleBar.show()
+    ...
+    self.lottiePlayer.play()
+12. 00:37–00:41 完整实现收束
+
+播放器 + overlay 两层：
+
+
+lottie_player.py
+Ln 21–22
+class LottiePlayer(QWidget):
+    """ ThorVG-backed Lottie player """
+
+splash_screen.py
+Ln 27–28
+class SplashScreen(FluentSplashScreen):
+    """ Collapse intro splash overlay """
+13. 00:41–00:45 资源来自 Collapse，入口 demo.py
+
+
+NOTICE.txt
+Ln 1–4
+NewLogoTitleIntro.json is vendored from CollapseLauncher/Collapse
+(https://github.com/CollapseLauncher/Collapse).
+MIT License
+Copyright (c) neon-nyan
+
+demo.py
+Ln 159–160
+if __name__ == '__main__':
+    sys.exit(main())
+片尾小字 qfluentwidgets + thorvg-python 对应：
+
+
+splash_screen.py
+Ln 10–11
+from qfluentwidgets import CheckBox, SplashScreen as FluentSplashScreen
+
+lottie_player.py
+Ln 11–11
+from thorvg_python import Colorspace, Engine, LottieAnimation, Result, SwCanvas
+剪辑时第 6、7 句建议叠旧对比图，不要切到当前 lottie_player.py，否则观众会以为代码里还有 rlottie。
