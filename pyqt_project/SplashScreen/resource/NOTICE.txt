@@ -1,0 +1,5 @@
+NewLogoTitleIntro.json is vendored from CollapseLauncher/Collapse
+(https://github.com/CollapseLauncher/Collapse).
+
+MIT License
+Copyright (c) neon-nyan
