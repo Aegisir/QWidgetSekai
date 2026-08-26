@@ -10,17 +10,17 @@
 
 | 主题 | 图片 | 运行入口 | 文件名 | 视频演示 |
 | :--- | :--- | :--- | :--- | :--- |
-| 粒子背景组件 | <img src="res/Particle.png" width="200" alt="Particle preview"> | `pyqt_project/Particle/src/demo.py` | `Particle` | [BV1mjLE6ME1o](https://www.bilibili.com/video/BV18bLK6rEsj) |
-| 流场背景组件 | <img src="res/FlowField.png" width="200" alt="FlowField preview">| `pyqt_project/FlowField/src/demo.py` | `FlowField` | [BV1uFLY6jEjU](https://www.bilibili.com/video/BV1uFLY6jEjU) |
-| 轮播横幅组件 | <img src="res/BannerView.png" width="200" alt="BannerView preview"> | `pyqt_project/BannerView/src/demo.py` | `BannerView` | [BV18bLK6rEsj](https://www.bilibili.com/video/BV1mjLE6ME1o) |
-| 卡片轮播组件 | <img src="res/CardSlider.png" width="200" alt="CardSlider preview">   | `pyqt_project/CardSlider/src/demo.py` | `CardSlider` | [BV1WoL26yE7M](https://www.bilibili.com/video/BV1WoL26yE7M) |
-| 堆叠卡片组件 | <img src="res/StackedCardCarousel.png" width="200" alt="StackedCardCarousel preview"> | `pyqt_project/StackedCardCarousel/src/demo.py` | `StackedCardCarousel` | - |
-| 微软商店导航动效 | <img src="res/MSNavigationBar.png" width="200" alt="MSNavigationBar preview"> | `pyqt_project/MSNavigationBar/src/demo.py` | `MSNavigationBar` |[BV1FHLG6rEHa](https://www.bilibili.com/video/BV1FHLG6rEHa)|
-| 开关按钮动效 | <img src="res/SwitchButton.png" width="200" alt="SwitchButton preview"> | `pyqt_project/SwitchButton/src/demo.py` | `SwitchButton` | [BV1ArLL6sEJy](https://www.bilibili.com/video/BV1ArLL6sEJy) |
-| 放大镜组件 | <img src="res/MagnifierLens.png" width="200" alt="MagnifierLens preview"> | `pyqt_project/MagnifierLens/src/demo.py` | `MagnifierLens` |[BV18mLU6bEYV](https://www.bilibili.com/video/BV18mLU6bEYV) |
-| 缩放视差组件 | <img src="res/ZoomParallax.png" width="200" alt="ZoomParallax preview"> | `pyqt_project/ZoomParallax/src/demo.py` | `ZoomParallax` |[BV1vzG863ELN](https://www.bilibili.com/video/BV1vzG863ELN)|
-| 剧透效果组件 | <img src="res/SpoilerLabel.png" width="200" alt="MagnifierLens preview"> | `pyqt_project/SpoilerLabel/src/demo.py` | `SpoilerLabel` |[BV1xpKK6VEGo](https://www.bilibili.com/video/BV1xpKK6VEGo)|
-| Collapse 开屏动画 | - | `pyqt_project/SplashScreen/src/demo.py` | `SplashScreen` | - |
+| 粒子背景组件 | <img src="res/Particle.png" width="200" alt="Particle preview"> | `/Particle/src/demo.py` | `Particle` | [BV1mjLE6ME1o](https://www.bilibili.com/video/BV18bLK6rEsj) |
+| 流场背景组件 | <img src="res/FlowField.png" width="200" alt="FlowField preview">| `/FlowField/src/demo.py` | `FlowField` | [BV1uFLY6jEjU](https://www.bilibili.com/video/BV1uFLY6jEjU) |
+| 轮播横幅组件 | <img src="res/BannerView.png" width="200" alt="BannerView preview"> | `/BannerView/src/demo.py` | `BannerView` | [BV18bLK6rEsj](https://www.bilibili.com/video/BV1mjLE6ME1o) |
+| 卡片轮播组件 | <img src="res/CardSlider.png" width="200" alt="CardSlider preview">   | `/CardSlider/src/demo.py` | `CardSlider` | [BV1WoL26yE7M](https://www.bilibili.com/video/BV1WoL26yE7M) |
+| 堆叠卡片组件 | <img src="res/StackedCardCarousel.png" width="200" alt="StackedCardCarousel preview"> | `/StackedCardCarousel/src/demo.py` | `StackedCardCarousel` | - |
+| 微软商店导航动效 | <img src="res/MSNavigationBar.png" width="200" alt="MSNavigationBar preview"> | `/MSNavigationBar/src/demo.py` | `MSNavigationBar` |[BV1FHLG6rEHa](https://www.bilibili.com/video/BV1FHLG6rEHa)|
+| 开关按钮动效 | <img src="res/SwitchButton.png" width="200" alt="SwitchButton preview"> | `/SwitchButton/src/demo.py` | `SwitchButton` | [BV1ArLL6sEJy](https://www.bilibili.com/video/BV1ArLL6sEJy) |
+| 放大镜组件 | <img src="res/MagnifierLens.png" width="200" alt="MagnifierLens preview"> | `/MagnifierLens/src/demo.py` | `MagnifierLens` |[BV18mLU6bEYV](https://www.bilibili.com/video/BV18mLU6bEYV) |
+| 缩放视差组件 | <img src="res/ZoomParallax.png" width="200" alt="ZoomParallax preview"> | `/ZoomParallax/src/demo.py` | `ZoomParallax` |[BV1vzG863ELN](https://www.bilibili.com/video/BV1vzG863ELN)|
+| 剧透效果组件 | <img src="res/SpoilerLabel.png" width="200" alt="MagnifierLens preview"> | `/SpoilerLabel/src/demo.py` | `SpoilerLabel` |[BV1xpKK6VEGo](https://www.bilibili.com/video/BV1xpKK6VEGo)|
+| Collapse 开屏动画 | - | `/SplashScreen/src/demo.py` | `SplashScreen` | - |
 
 
  <p>注：Demo 使用 pip 包 <code>qfluentwidgets</code> 提供窗口、按钮、样式和主题控件；SplashScreen 另需 <code>thorvg-python</code> 播放 Collapse Lottie</p>
